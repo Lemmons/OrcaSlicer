@@ -89,7 +89,10 @@ configure_and_build() {
 
     if [[ ${#existing_libs[@]} -eq 0 ]]; then
         echo "Syncing static libraries from build tree into ${lib_dir}"
-        mapfile -t built_libs < <(find "${build_dir}" -path '*/CMakeFiles/*' -prune -o -name 'lib*.a' -print | sort)
+        local -a built_libs=()
+        while IFS= read -r lib; do
+            built_libs+=("${lib}")
+        done < <(find "${build_dir}" -path '*/CMakeFiles/*' -prune -o -name 'lib*.a' -print | sort)
         if [[ ${#built_libs[@]} -eq 0 ]]; then
             echo "Unable to locate static libraries for ${name} in ${build_dir}" >&2
             exit 1
@@ -99,7 +102,10 @@ configure_and_build() {
         done
     fi
 
-    mapfile -t static_libs < <(find "${lib_dir}" -name 'libOrcaCore.a' -prune -o -name '*.a' -print | sort)
+    local -a static_libs=()
+    while IFS= read -r lib; do
+        static_libs+=("${lib}")
+    done < <(find "${lib_dir}" \( -name 'libOrcaCore.a' -prune \) -o -name '*.a' -print | sort)
     if [[ ${#static_libs[@]} -eq 0 ]]; then
         echo "No static libraries were installed for ${name}; expected at least one." >&2
         exit 1
