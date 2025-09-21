@@ -1,0 +1,64 @@
+name: macOS XCFramework
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'release/**'
+  pull_request:
+
+jobs:
+  build-xcframework:
+    name: Build OrcaCore.xcframework
+    runs-on: macos-13
+    timeout-minutes: 90
+    env:
+      BUILD_CONFIG: Release
+      IOS_INCLUDE_SIMULATOR_X86_64: '1'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '15.3'
+
+      - name: Install build dependencies
+        run: |
+          brew update
+          brew install cmake ninja
+
+      - name: Cache Xcode DerivedData
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-deriveddata-${{ hashFiles('CMakeLists.txt', 'cmake/**/*.cmake', 'src/**/CMakeLists.txt', 'scripts/build_ios_core.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-deriveddata-
+
+      - name: Cache CMake build trees
+        uses: actions/cache@v4
+        with:
+          path: build/ios
+          key: ${{ runner.os }}-iosbuild-${{ hashFiles('CMakeLists.txt', 'cmake/**/*.cmake', 'src/**/CMakeLists.txt', 'deps/**/CMakeLists.txt', 'scripts/build_ios_core.sh', 'scripts/package_ios_xcframework.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-iosbuild-
+
+      - name: Build static libraries
+        run: scripts/build_ios_core.sh
+
+      - name: Package OrcaCore.xcframework
+        run: scripts/package_ios_xcframework.sh
+
+      - name: Upload OrcaCore artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OrcaCore-xcframework
+          path: |
+            build/ios/artifacts/OrcaCore.xcframework
+            build/ios/logs
+          if-no-files-found: error
