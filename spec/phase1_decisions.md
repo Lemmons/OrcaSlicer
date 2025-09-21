@@ -4,7 +4,7 @@
 
 | ID | Date | Decision | Context / Options Considered | Owner(s) | Impacted Milestones | Follow-up Actions | Status |
 |----|------|----------|-------------------------------|----------|---------------------|-------------------|--------|
-| DEC-0001 | _(YYYY-MM-DD)_ | _(Decision summary)_ | _(Problem framing & evaluated options)_ | _(Names)_ | _(e.g., M0, M1)_ | _(Tasks, due dates)_ | _(Open/Closed)_ |
+| DEC-0001 | 2025-09-21 | Target `.xcframework` as distributable for Orca core | Evaluated static `.a` (manual linking), `.xcframework`, and SwiftPM binary target. Static `.a` build blocked on Linux container; `.xcframework` best aligns with Swift integration and future SwiftPM distribution. Details captured in `spec/m0_packaging_findings.md`. | Core Packaging Agent + Bridge & Data Agent | M0, M2, M3 | Provision macOS builder; integrate `ios-cmake` toolchain; draft packaging script for simulator/device archives | Open |
 
 > **Instructions:**
 > - Keep entries concise but link to supporting documents (e.g., `spec/m0_packaging_findings.md`).
